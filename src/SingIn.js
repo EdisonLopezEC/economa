@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { auth, db } from './firebase';
 import "animate.css/animate.min.css";
 import { AuthContext } from './context/AuthContext';
-import { userContext } from './App';
+import { infoUserContext, userContext } from './App';
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
 
@@ -10,6 +10,8 @@ import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
 export default function SignIn() {
   const navigate = useNavigate();
   const [isAuthenth, setIsAuthenth] = useContext(userContext);
+  const [infoUser, setInfoUser] = useContext(infoUserContext);
+
   const [isRegistering, setIsRegistering] = useState(false);
 
   const [formState, setFormState] = useState({
@@ -47,9 +49,29 @@ export default function SignIn() {
       .signInWithEmailAndPassword(email, password)
       .then((userCredentials) => {
         const user = userCredentials.user;
+        setInfoUser(user);
         setErrorLogin(false);
         setIsAuthenth(true);
-        navigate("/dashboard");
+        console.log('llega aca')
+
+        console.log('aqui permisooos ', user.uid);
+
+        const userRef = doc(db, 'usuarios', user.uid);
+        getDoc(userRef).then((docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            setInfoUser(userData);
+            console.log('USER PERMISOOOOO ', userData.permisos);
+
+            if (userData.permisos === "admin") {
+              navigate("/dashboard");
+            }
+            if (userData.permisos === "usuario") {
+              navigate("/client");
+            }
+
+          }
+        })
       })
       .catch((error) => {
         setErrorLogin(true);
@@ -71,11 +93,13 @@ export default function SignIn() {
         await setDoc(docRef, {
           nombre: usuario.nombre,
           correo: usuario.correo,
-          permisos: "usuario",
+          permisos: usuario.permisos,
           uid: auth.currentUser.uid,
           // Agrega más campos de datos si es necesario
         });
         console.log("Usuario actualizado en la base de datos");
+      navigate("/client");
+
       } else {
         // Si el usuario no existe, crea un nuevo documento con sus datos
         await setDoc(docRef, {
@@ -86,6 +110,8 @@ export default function SignIn() {
           // Agrega más campos de datos si es necesario
         });
         console.log("Nuevo usuario guardado en la base de datos");
+    navigate("/client");
+
       }
     } catch (error) {
       console.error("Error al guardar el usuario: ", error);
@@ -101,7 +127,6 @@ export default function SignIn() {
           const user = userCredential.user;
           const { uid } = user;
           guardarUsuario({ nombre, correo: registroEmail, permisos: "usuario" });
-          console.log('Registro exitoso');
         })
         .catch((error) => {
           console.error('Error al registrar el usuario: ', error);
@@ -109,6 +134,7 @@ export default function SignIn() {
     } else {
       console.error('Error al registrar el usuario: alguno de los campos está vacío');
     }
+
   };
   
 

@@ -142,7 +142,7 @@ const DatosComponent = () => {
           className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-indigo-200"
           type="submit"
         >
-          Registrarse
+          Actualizar
         </button>
         {logoURL && (
   <div className="mt-4 flex justify-center items-center flex-col">

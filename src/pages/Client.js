@@ -1,12 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { infoUserContext, userContext } from '../App';
+import { userContext } from '../App';
 import { auth } from "../firebase";
 import DatosComponent from '../components/DatosComponent';
 import CreditosComponent from '../components/CreditosComponent';
 import { RiFileTextLine, RiSettings3Line } from 'react-icons/ri';
 import "animate.css";
 import { IconContext } from 'react-icons';
-import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ handleOptionSelect }) => {
   return (
@@ -39,22 +38,14 @@ const Sidebar = ({ handleOptionSelect }) => {
 };
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-
   const [isAuthent, setIsAuthent] = useContext(userContext);
-  const[infoUser, setInfoUser] = useContext(infoUserContext);
-  
   const [selectedOption, setSelectedOption] = useState(null);
-
 
   const handleSignup = () => {
     auth
       .signOut()
       .then(() => {
         setIsAuthent(false);
-        setInfoUser([])
-        navigate("/")
-    
       })
       .catch((error) => alert(error.message));
   };
@@ -65,7 +56,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col md:flex-row">
-      <Sidebar handleOptionSelect={handleOptionSelect} />
+      {/* <Sidebar handleOptionSelect={handleOptionSelect} /> */}
       <div className="w-full md:w-4/5 p-8">
         <h2 className="text-4xl text-center font-bold mb-6 text-gray-800">
           ¡Bienvenido de nuevo! {isAuthent}
