@@ -1,11 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
-import "animate.css/animate.min.css";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore/lite";
-import { auth, db } from "../firebase";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import "jspdf-autotable";
 import "animate.css/animate.min.css";
 import { IoMdLogOut } from "react-icons/io";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore/lite";
+import { auth, db } from "../firebase";
 import { infoUserContext, userContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const CreditosComponent = () => {
   const navigate = useNavigate();
@@ -21,12 +23,14 @@ const CreditosComponent = () => {
   const [selectedCredito, setSelectedCredito] = useState("");
   const [sistemaAmortizacion, setSistemaAmortizacion] = useState("aleman");
   const [showLogout, setShowLogout] = useState(false);
-  // Add these state variables
+
   const [totalCuota, setTotalCuota] = useState(0);
   const [totalSeguro, setTotalSeguro] = useState(0);
   const [totalCuotaTotal, setTotalCuotaTotal] = useState(0);
   const [totalInteres, setTotalInteres] = useState(0);
   const [totalCapital, setTotalCapital] = useState(0);
+
+  const tableRef = useRef(null);
 
   const handleAvatarClick = () => {
     setShowLogout(!showLogout);
@@ -41,8 +45,6 @@ const CreditosComponent = () => {
     };
     fetchEmpresaData();
   };
-
-  // ...
 
   const [creditosList, setCreditosList] = useState([]);
 
@@ -62,8 +64,7 @@ const CreditosComponent = () => {
   }, []);
 
   const calculateAmortization = (monto, plazo, tasaInteres, seguro) => {
-
-    if(seguro = ''){
+    if (seguro === "") {
       seguro = 0;
     }
 
@@ -98,30 +99,17 @@ const CreditosComponent = () => {
         saldo: saldo.toFixed(2),
       });
       setTotalCuota((prev) => prev + parseFloat(cuota.toFixed(2)));
-    setTotalSeguro((prev) => prev + parseFloat(seguroPorCuota.toFixed(2)));
-    setTotalCuotaTotal((prev) => prev + parseFloat(cuotaTotal.toFixed(2)));
-    setTotalInteres((prev) => prev + parseFloat(interes.toFixed(2)));
-    setTotalCapital((prev) => prev + parseFloat(capital.toFixed(2)));
+      setTotalSeguro((prev) => prev + parseFloat(seguroPorCuota.toFixed(2)));
+      setTotalCuotaTotal((prev) => prev + parseFloat(cuotaTotal.toFixed(2)));
+      setTotalInteres((prev) => prev + parseFloat(interes.toFixed(2)));
+      setTotalCapital((prev) => prev + parseFloat(capital.toFixed(2)));
     }
-    
 
     return amortizationTable;
   };
 
-  const handleSignup = () => {
-    auth
-      .signOut()
-      .then(() => {
-        setIsAuthent(false);
-        setInfoUser([]);
-        navigate("/", { replace: true });
-      })
-      .catch((error) => alert(error.message));
-  };
-
   const calculateAmortizationFrances = (monto, plazo, tasaInteres, seguro) => {
-
-    if(seguro = ''){
+    if (seguro === "") {
       seguro = 0;
     }
     setTotalCuota(0);
@@ -158,12 +146,12 @@ const CreditosComponent = () => {
 
       amortizationTable.push({
         numeroCuota: i,
-        cuota: cuota.toFixed(2), // <-- Error puede estar aquí
-        seguro: seguroCuota.toFixed(2), // <-- Error puede estar aquí
-        cuotaTotal: cuotaTotal.toFixed(2), // <-- Error puede estar aquí
-        interes: interes.toFixed(2), // <-- Error puede estar aquí
-        capital: capital.toFixed(2), // <-- Error puede estar aquí
-        saldo: saldo.toFixed(2), // <-- Error puede estar aquí
+        cuota: cuota.toFixed(2),
+        seguro: seguroCuota.toFixed(2),
+        cuotaTotal: cuotaTotal.toFixed(2),
+        interes: interes.toFixed(2),
+        capital: capital.toFixed(2),
+        saldo: saldo.toFixed(2),
       });
 
       setTotalCuota((prev) => prev + parseFloat(cuota.toFixed(2)));
@@ -171,7 +159,6 @@ const CreditosComponent = () => {
       setTotalCuotaTotal((prev) => prev + parseFloat(cuotaTotal.toFixed(2)));
       setTotalInteres((prev) => prev + parseFloat(interes.toFixed(2)));
       setTotalCapital((prev) => prev + parseFloat(capital.toFixed(2)));
-      
     }
 
     return amortizationTable;
@@ -188,6 +175,43 @@ const CreditosComponent = () => {
           calculateAmortizationFrances(monto, plazo, tasaInteres, seguro)
         );
   };
+
+  const handleSignup = () => {
+    auth
+      .signOut()
+      .then(() => {
+        setIsAuthent(false);
+        setInfoUser([]);
+        navigate("/", { replace: true });
+      })
+      .catch((error) => alert(error.message));
+  };
+
+  const handleSaveAsPDF = () => {
+    if (!tableRef.current) {
+      return;
+    }
+
+    const pdf = new jsPDF("p", "pt", "letter");
+
+    const source = tableRef.current;
+
+    const margins = {
+      top: 60,
+      bottom: 60,
+      left: 40,
+      right: 40,
+    };
+
+    pdf.autoTable({
+      html: source,
+      startY: margins.top + 10,
+      margin: margins,
+    });
+
+    pdf.save("amortization_table.pdf");
+  };
+
   return (
     <>
       <div className="bg-gradient-to-r from-blue-500 to-blue-700 text-white">
@@ -304,8 +328,21 @@ const CreditosComponent = () => {
           Calcular Amortización
         </button>
 
+        {
+          totalCuota > 0 && (  <button
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full mt-4 w-full md:w-auto"
+            onClick={handleSaveAsPDF}
+          >
+            Guardar como PDF
+          </button>)
+        }
+ 
+
         <div className="mt-8 overflow-x-auto rounded-lg shadow-md">
-          <table className="table-auto w-full border-collapse border rounded overflow-hidden">
+          <table
+            ref={tableRef}
+            className="table-auto w-full border-collapse border rounded overflow-hidden"
+          >
             <thead>
               <tr className="bg-gray-200">
                 <th className="px-3 py-2 border">Número de cuota (N)</th>
@@ -366,6 +403,7 @@ const CreditosComponent = () => {
             </tbody>
           </table>
         </div>
+
       </div>
     </>
   );
