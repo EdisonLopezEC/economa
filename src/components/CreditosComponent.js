@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
-import Modal from "react-modal"; // Importa react-modal
+import Modal from "react-modal";
 import { collection, addDoc, doc, deleteDoc, getDocs, updateDoc } from "firebase/firestore/lite";
-import "animate.css"; // Importa la biblioteca de animaciones Animate.css
+import "animate.css";
 
 const CreditosComponent = () => {
   const [creditoState, setCreditoState] = useState({
@@ -12,7 +12,7 @@ const CreditosComponent = () => {
 
   const [creditosList, setCreditosList] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedCredito, setSelectedCredito] = useState(null); // Nuevo estado para almacenar el crédito seleccionado
+  const [selectedCredito, setSelectedCredito] = useState(null);
   const [seguro, setSeguro] = useState("");
   const [donacion, setDonacion] = useState("");
 
@@ -28,8 +28,8 @@ const CreditosComponent = () => {
 
   useEffect(() => {
     fetchCreditos();
-  }, []);
-
+  }, [])
+  
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setCreditoState((prevState) => ({
@@ -49,7 +49,8 @@ const CreditosComponent = () => {
         await addDoc(creditosCollectionRef, credito);
         console.log("Credito guardado correctamente");
       }
-      fetchCreditos();
+      // fetchCreditos();
+      setCreditosList([credito,...creditosList]);
       setCreditoState({ nombreCredito: "", tasaInteresCredito: "" });
     } catch (error) {
       console.error("Error al guardar el credito: ", error);
@@ -57,7 +58,7 @@ const CreditosComponent = () => {
   };
 
   const editarCredito = (credito) => {
-    setSelectedCredito(credito); // Actualiza el crédito seleccionado
+    setSelectedCredito(credito);
     setCreditoState({
       id: credito.id,
       nombreCredito: credito.nombreCredito,
@@ -86,9 +87,9 @@ const CreditosComponent = () => {
   };
 
   const openModal = (credito) => {
-    setSelectedCredito(credito); // Actualiza el crédito seleccionado
-    setSeguro(credito.seguro || ""); // Establece el valor del seguro del crédito o un string vacío si no existe
-    setDonacion(credito.donacion || ""); // Establece el valor de la donación del crédito o un string vacío si no existe
+    setSelectedCredito(credito);
+    setSeguro(credito.seguro || "");
+    setDonacion(credito.donacion || "");
     setModalIsOpen(true);
   };
 
@@ -107,7 +108,7 @@ const CreditosComponent = () => {
   };
 
   return (
-<div className="max-w-md mx-auto m-4 p-6 bg-white rounded shadow-md animate__animated animate__fadeIn">
+    <div className="max-w-md mx-auto pl-6 pr-6 bg-white rounded shadow-md animate__animated animate__fadeIn">
       <h2 className="text-2xl font-bold text-center mb-6">Formulario de Créditos</h2>
       <form onSubmit={handleFormSubmit} className="animate__animated animate__fadeIn">
         <div className="mb-4">
@@ -142,7 +143,7 @@ const CreditosComponent = () => {
         </button>
       </form>
 
-      <div className="mt-8">
+      <div className="mt-8 max-h-96 overflow-y-auto">
         <h2 className="text-2xl font-bold text-center mb-6">Lista de Créditos</h2>
         <ul>
           {creditosList.map((credito) => (
@@ -171,60 +172,58 @@ const CreditosComponent = () => {
           ))}
         </ul>
       </div>
+
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <Modal
-            isOpen={modalIsOpen}
-            onRequestClose={closeModal}
-            contentLabel="Example Modal"
-            className="modal bg-white p-6 rounded-md w-80"
-            style={{
-                overlay: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)'
-                }
-            }}
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+          contentLabel="Example Modal"
+          className="modal bg-white p-6 rounded-md w-80"
+          style={{
+            overlay: {
+              backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }}
         >
-            <h2 className="text-xl font-bold mb-4 text-center">Agregar Seguro y Donación</h2>
-            <form className="flex flex-col items-center">
-                <div className="w-full mb-4">
-                    <label className="text-base" htmlFor="seguro">Seguro:</label>
-                    <input
-                        type="text"
-                        id="seguro"
-                        value={seguro}
-                        onChange={(e) => setSeguro(e.target.value)}
-                        className="w-full bg-gray-100 rounded-lg border-2 border-gray-200 focus:outline-none focus:border-blue-500 text-base py-2 px-4 block"
-                    />
-                </div>
-                <div className="w-full mb-4">
-                    <label className="text-base" htmlFor="donacion">Donación:</label>
-                    <input
-                        type="text"
-                        id="donacion"
-                        value={donacion}
-                        onChange={(e) => setDonacion(e.target.value)}
-                        className="w-full bg-gray-100 rounded-lg border-2 border-gray-200 focus:outline-none focus:border-blue-500 text-base py-2 px-4 block"
-                    />
-                </div>
-                <div className="flex justify-center items-center space-x-4">
-                    <button
-                        onClick={handleAccept}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    >
-                        Aceptar
-                    </button>
-                    <button
-                        onClick={closeModal}
-                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    >
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+          <h2 className="text-xl font-bold mb-4 text-center">Agregar Seguro y Donación</h2>
+          <form className="flex flex-col items-center">
+            <div className="w-full mb-4">
+              <label className="text-base" htmlFor="seguro">Seguro:</label>
+              <input
+                type="text"
+                id="seguro"
+                value={seguro}
+                onChange={(e) => setSeguro(e.target.value)}
+                className="w-full bg-gray-100 rounded-lg border-2 border-gray-200 focus:outline-none focus:border-blue-500 text-base py-2 px-4 block"
+              />
+            </div>
+            <div className="w-full mb-4">
+              <label className="text-base" htmlFor="donacion">Donación:</label>
+              <input
+                type="text"
+                id="donacion"
+                value={donacion}
+                onChange={(e) => setDonacion(e.target.value)}
+                className="w-full bg-gray-100 rounded-lg border-2 border-gray-200 focus:outline-none focus:border-blue-500 text-base py-2 px-4 block"
+              />
+            </div>
+            <div className="flex justify-center items-center space-x-4">
+              <button
+                onClick={handleAccept}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Aceptar
+              </button>
+              <button
+                onClick={closeModal}
+                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
         </Modal>
       </div>
-
-
-
     </div>
   );
 };

@@ -74,6 +74,7 @@ function App() {
         </div>
       )
     }
+  
 
     if (isAuthenth) {
       if (infoUser.permisos === "admin") {
@@ -100,12 +101,7 @@ function App() {
               {infoUser.permisos === "admin" && <Route path="/dashboard" element={<Dashboard />} />} 
               {infoUser.permisos === "usuario" && <Route path="/client" element={<Client />}/>}
             </Route>
-                {/* <Route
-            element={<ProtectedRoute canActivate={isAuthenth} />}
-          >
-            <Route path="/dashboard" element={<Dashboard />} /> 
-    
-          </Route> */}
+
           </Routes>
         </BrowserRouter>
       </infoUserContext.Provider>

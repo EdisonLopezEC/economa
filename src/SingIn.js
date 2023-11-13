@@ -127,6 +127,7 @@ export default function SignIn() {
           const user = userCredential.user;
           const { uid } = user;
           guardarUsuario({ nombre, correo: registroEmail, permisos: "usuario" });
+          setInfoUser({ nombre, correo: registroEmail, permisos: "usuario" });
         })
         .catch((error) => {
           console.error('Error al registrar el usuario: ', error);
@@ -241,9 +242,9 @@ export default function SignIn() {
       <div className="w-full max-w-md ml-6">
         <div className="bg-indigo-200 p-8 rounded-lg shadow-lg animate__animated animate__fadeInUp">
           <div className="text-center">
-            <h3 className="text-4xl text-indigo-800 font-extrabold mb-4">¡Gestin te da la bienvenida!</h3>
+            <h3 className="text-4xl text-indigo-800 font-extrabold mb-4">¡CuotaSmart te da la bienvenida!</h3>
             <p className="text-gray-700">
-              Descubre una forma eficiente de gestionar tus proyectos y tareas. ¡Pruébalo hoy mismo!
+            Optimiza pagos y visualiza cuotas con nuestro software de amortización online intuitivo y eficiente.
             </p>
           </div>
         </div>
