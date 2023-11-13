@@ -29,6 +29,7 @@ export default function SignIn() {
   const { email, password } = formState;
   const { nombre, registroEmail, registroPassword } = registerFormState;
   const [errorLogin, setErrorLogin] = useState(false);
+  const [passwordError, setPasswordError] = useState(false); // Nuevo estado para el mensaje de error de la contraseña
 
   const handleInputChange = ({ target }) => {
     setFormState({
@@ -53,16 +54,12 @@ export default function SignIn() {
         setInfoUser(user);
         setErrorLogin(false);
         setIsAuthenth(true);
-        console.log('llega aca')
-
-        console.log('aqui permisooos ', user.uid);
 
         const userRef = doc(db, 'usuarios', user.uid);
         getDoc(userRef).then((docSnap) => {
           if (docSnap.exists()) {
             const userData = docSnap.data();
             setInfoUser(userData);
-            console.log('USER PERMISOOOOO ', userData.permisos);
 
             if (userData.permisos === "admin") {
               navigate("/dashboard");
@@ -70,7 +67,6 @@ export default function SignIn() {
             if (userData.permisos === "usuario") {
               navigate("/client");
             }
-
           }
         })
       })
@@ -82,46 +78,42 @@ export default function SignIn() {
   };
 
   const guardarUsuario = async (usuario) => {
-    // Aquí debes asegurarte de tener los datos del usuario, como nombre, correo, etc.
     try {
-      // Reemplaza "usuarios" con el nombre de tu colección en Firestore
       const docRef = doc(db, "usuarios", auth.currentUser.uid);
       const docSnap = await getDoc(docRef);
       const data = docSnap.data();
-  
+
       if (docSnap.exists()) {
-        // Si el usuario ya existe, actualiza sus datos
         await setDoc(docRef, {
           nombre: usuario.nombre,
           correo: usuario.correo,
           permisos: usuario.permisos,
           uid: auth.currentUser.uid,
-          // Agrega más campos de datos si es necesario
         });
         console.log("Usuario actualizado en la base de datos");
-      navigate("/client");
-
+        navigate("/client");
       } else {
-        // Si el usuario no existe, crea un nuevo documento con sus datos
         await setDoc(docRef, {
           nombre: usuario.nombre,
           correo: usuario.correo,
           permisos: usuario.permisos,
           uid: auth.currentUser.uid,
-          // Agrega más campos de datos si es necesario
         });
         console.log("Nuevo usuario guardado en la base de datos");
-    navigate("/client");
-
+        navigate("/client");
       }
     } catch (error) {
       console.error("Error al guardar el usuario: ", error);
     }
   };
-  
 
   const handleRegister = () => {
     if (registroEmail && registroPassword && nombre) {
+      if (registroPassword.length < 6) {
+        setPasswordError(true);
+        return;
+      }
+
       auth
         .createUserWithEmailAndPassword(registroEmail, registroPassword)
         .then((userCredential) => {
@@ -136,9 +128,7 @@ export default function SignIn() {
     } else {
       console.error('Error al registrar el usuario: alguno de los campos está vacío');
     }
-
   };
-  
 
   return (
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-purple-500 to-indigo-500">
@@ -208,6 +198,10 @@ export default function SignIn() {
             </div>
           )}
 
+          {passwordError && (
+            <div className="text-red-500 text-sm italic text-center mb-4">La contraseña debe tener al menos 6 caracteres.</div>
+          )}
+
           {errorLogin && (
             <div className="text-red-500 text-sm italic text-center mb-4">Credenciales incorrectas. Inténtalo de nuevo.</div>
           )}
@@ -245,7 +239,7 @@ export default function SignIn() {
           <div className="text-center">
             <h3 className="text-4xl text-indigo-800 font-extrabold mb-4">¡CuotaSmart te da la bienvenida!</h3>
             <p className="text-gray-700">
-            Optimiza pagos y visualiza cuotas con nuestro software de amortización online intuitivo y eficiente.
+              Optimiza pagos y visualiza cuotas con nuestro software de amortización online intuitivo y eficiente.
             </p>
           </div>
         </div>
