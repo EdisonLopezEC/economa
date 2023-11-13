@@ -6,6 +6,7 @@ import { infoUserContext, userContext } from './App';
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
 
+document.title = "CuotaSmart";
 
 export default function SignIn() {
   const navigate = useNavigate();
